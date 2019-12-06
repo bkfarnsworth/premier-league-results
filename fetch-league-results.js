@@ -1,6 +1,18 @@
 const _ = require("lodash");
+const axios = require("axios");
 
-module.exports = function main() {
+module.exports = async function main() {
+  console.log(_.sum([2, 3, 4]));
+
+  let result2;
+  try {
+    result2 = await axios.get("https://www.google.com");
+  } catch (e) {
+    console.log("e: ", e);
+  }
+
+  console.log("result2: ", result2);
+
   var premTable = getPremierLeagueTable();
 
   //need to load the schedule for each team in the prem league
