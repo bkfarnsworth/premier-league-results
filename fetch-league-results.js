@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const axios = require('axios');
+const cheerio = require('cheerio');
 
 module.exports = async function main() {
 	let result2;
@@ -9,12 +10,20 @@ module.exports = async function main() {
 		console.log('e: ', e);
 	}
 
-	var allResults = await Promise.all([
-		axios.get('https://www.google.com'),
-		axios.get('https://www.espn.com')
-	]);
+	// var allResults = await Promise.all([
+	// 	axios.get('https://www.google.com'),
+	// 	axios.get('https://www.espn.com')
+	// ]);
 
-	console.log('allResults: ', allResults);
+	const html = await axios.get(
+		'https://www.espn.com/soccer/table/_/league/eng.1'
+	);
+	console.log('html: ', html.data);
+
+	const $ = cheerio.load(html.data);
+	const tables = $('table');
+
+	console.log(tables);
 
 	var premTable = getPremierLeagueTable();
 
