@@ -4,12 +4,17 @@ const axios = require('axios');
 module.exports = async function main() {
 	let result2;
 	try {
-		result2 = await axios.get('https://www.google.com');
+		result2 = await axios.get('https://www.espn.com');
 	} catch (e) {
 		console.log('e: ', e);
 	}
 
-	console.log('result2: ', result2);
+	var allResults = await Promise.all([
+		axios.get('https://www.google.com'),
+		axios.get('https://www.espn.com')
+	]);
+
+	console.log('allResults: ', allResults);
 
 	var premTable = getPremierLeagueTable();
 
