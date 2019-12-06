@@ -18,12 +18,18 @@ module.exports = async function main() {
 	const html = await axios.get(
 		'https://www.espn.com/soccer/table/_/league/eng.1'
 	);
-	console.log('html: ', html.data);
+	// console.log('html: ', html.data);
 
 	const $ = cheerio.load(html.data);
 	const tables = $('table');
+	const teams = $('.team-link:last-child')
+		.toArray()
+		.map(el => $(el).text());
 
-	console.log(tables);
+	console.log('teams');
+	console.log(teams);
+
+	return;
 
 	var premTable = getPremierLeagueTable();
 
