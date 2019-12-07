@@ -2,38 +2,28 @@ const _ = require('lodash');
 const axios = require('axios');
 const cheerio = require('cheerio');
 
+// var allResults = await Promise.all([
+// 	axios.get('https://www.google.com'),
+// 	axios.get('https://www.espn.com')
+// ]);
+
+// const html =
+// console.log('html: ', html.data);
+
+// const $ = cheerio.load(html.data);
+// const tables = $('table');
+// const teams = $('.team-link:last-child')
+// 	.toArray()
+// 	.map(el => $(el).text());
+
 module.exports = async function main() {
-	let result2;
-	try {
-		result2 = await axios.get('https://www.espn.com');
-	} catch (e) {
-		console.log('e: ', e);
-	}
+	var premTable = await getPremierLeagueTable();
 
-	// var allResults = await Promise.all([
-	// 	axios.get('https://www.google.com'),
-	// 	axios.get('https://www.espn.com')
-	// ]);
-
-	const html = await axios.get(
-		'https://www.espn.com/soccer/table/_/league/eng.1'
-	);
-	// console.log('html: ', html.data);
-
-	const $ = cheerio.load(html.data);
-	const tables = $('table');
-	const teams = $('.team-link:last-child')
-		.toArray()
-		.map(el => $(el).text());
-
-	console.log('teams');
-	console.log(teams);
-
-	return;
-
-	var premTable = getPremierLeagueTable();
+	console.log('premTable: ', premTable);
 
 	//need to load the schedule for each team in the prem league
+
+	return;
 
 	var scheduleRequests = [];
 	traverseTables([premTable], {
@@ -197,9 +187,10 @@ function determineTeamsLeftToPlay(teamInQuestion, dataTables) {
 	return teamsLeftToPlay;
 }
 
-function getPremierLeagueTable() {
+async function getPremierLeagueTable() {
 	var url = 'https://www.espn.com/soccer/table/_/league/eng.1';
-	var html = UrlFetchApp.fetch(url).getContentText();
+	var response = await axios.get(url);
+	var html = response.data;
 	var tables = html.match(/<table.*?<\/table>/gm);
 	var teamTable = tables[0];
 	var pointsTable = tables[1];
@@ -275,35 +266,33 @@ function getCellsFromTable(table, opts) {
 			return [];
 		};
 
-	var document = XmlService.parse(table);
-	var root = document.getRootElement();
-	var rows = root
-		.getDescendants()
-		.filter(function(r) {
-			return r.getName && r.getName() === 'tr';
+	const $ = cheerio.load(table);
+	var rows = $('tr')
+		.toArray()
+		.map(rowEl => {
+			return $(rowEl)
+				.find('td,th')
+				.toArray();
 		})
-		.map(function(r) {
-			return r.getChildren('td').concat(r.getChildren('th'));
-		})
-		.map(function(row, rowIndex) {
-			//go through and add more cells if custom cells creator
+		.map((row, rowIndex) => {
 			var processedCells = [];
 			row.forEach(function(cell, cellIndex) {
 				//add the cell as a string
-				processedCells.push(cell.getValue && cell.getValue());
+				processedCells.push($(cell).text());
 
 				//now run the custom cell creator to add additionalCells
-				var customCells = createCustomCells(
-					cell,
-					cellIndex,
-					row,
-					rowIndex
-				);
-				processedCells = processedCells.concat(customCells);
+				// var customCells = createCustomCells(
+				// 	cell,
+				// 	cellIndex,
+				// 	row,
+				// 	rowIndex
+				// );
+				// processedCells = processedCells.concat(customCells);
 			});
 
 			return processedCells;
 		});
+
 	return rows;
 }
 
