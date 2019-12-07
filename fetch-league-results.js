@@ -202,18 +202,9 @@ async function getPremierLeagueTable() {
 			//else it must be the header cell
 			if (rowIndex !== 0) {
 				//create the links as cells
-				var links = cell.getDescendants().filter(function(d) {
-					return d.getName && d.getName() === 'a';
-				});
-
-				var hrefs = links.map(function(link) {
-					return link.getAttribute('href');
-				});
-
-				customCells =
-					hrefs && hrefs[0] && hrefs[0].getValue
-						? [hrefs[0].getValue()]
-						: [];
+				var links = cell.find('a').toArray();
+				var hrefs = links.map(link => _.get(link, 'attribs.href'));
+				customCells = get(() => [hrefs[0]]) || [];
 			} else {
 				customCells = ['Link'];
 			}
@@ -281,13 +272,13 @@ function getCellsFromTable(table, opts) {
 				processedCells.push($(cell).text());
 
 				//now run the custom cell creator to add additionalCells
-				// var customCells = createCustomCells(
-				// 	cell,
-				// 	cellIndex,
-				// 	row,
-				// 	rowIndex
-				// );
-				// processedCells = processedCells.concat(customCells);
+				var customCells = createCustomCells(
+					$(cell),
+					cellIndex,
+					$(row),
+					rowIndex
+				);
+				processedCells = processedCells.concat(customCells);
 			});
 
 			return processedCells;
@@ -360,3 +351,16 @@ function get(func, defaultVal) {
 		return defaultVal;
 	}
 }
+
+// class Table {
+// 	constructor() {
+// 		this.rows = []
+// 	}
+// }
+
+// class Row {
+// 	constructor() {
+// 		this.teamName = ''
+// 		this.gamesPlayed = ''
+// 	}
+// }
