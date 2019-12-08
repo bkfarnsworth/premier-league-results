@@ -19,40 +19,23 @@ const cheerio = require('cheerio');
 module.exports = async function main() {
 	var premTable = await getPremierLeagueTable();
 
-	console.log('premTable: ', premTable);
-
-	//need to load the schedule for each team in the prem league
-
-	return;
-
-	var scheduleRequests = [];
+	var schedulePromises = [];
 	traverseTables([premTable], {
 		forEachRow: function(row) {
 			var scheduleLink = createScheduleLinkFromTeamLink(row[1]);
-			scheduleRequests.push({
-				url: scheduleLink,
-				method: 'get'
-			});
+			schedulePromises.push(
+				axios.get(scheduleLink).then(res => ({ res, premRow: row }))
+			);
 		}
 	});
 
-	var result = new RetriableRequestsBatch(
-		UrlFetchApp,
-		scheduleRequests
-	).fetchWithRetries();
-	if (result.error) {
-		console.error('Error happened when fetching batch:', result.error);
-		return 'result.error';
-	}
+	const results = await Promise.all(schedulePromises);
 
-	//add a "Remaining Difficulty" column
+	//add a "Remaining Difficulty" column and add all combined points into premTable
 	premTable[0].push('Remaining Difficulty');
-
-	//add all combined points into premTable
-	result.responses.forEach(function(res, index) {
-		var team = premTable[index + 1][0];
-
-		var tables = res.getContentText().match(/<table.*?<\/table>/gm);
+	results.forEach(function({ res, premRow }) {
+		const $ = cheerio.load(res.data);
+		var tables = $('table').toArray();
 		var scheduleTables = tables.map(function(t) {
 			return getCellsFromTable(t);
 		});
@@ -68,12 +51,14 @@ module.exports = async function main() {
 		});
 
 		var combinedOpponentPoints = getRemainingDifficultyForTeam(
-			team,
+			premRow[0],
 			scheduleTables,
 			premTable
 		);
-		premTable[index + 1].push(combinedOpponentPoints);
+		premRow.push(combinedOpponentPoints);
 	});
+
+	console.log('premTable: ', premTable);
 
 	return premTable;
 };
