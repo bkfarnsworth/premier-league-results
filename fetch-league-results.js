@@ -17,6 +17,8 @@ const cheerio = require('cheerio');
 // 	.map(el => $(el).text());
 
 module.exports = async function main() {
+	console.log('Loading...');
+
 	var premTable = await getPremierLeagueTable();
 
 	var schedulePromises = [];
@@ -58,9 +60,15 @@ module.exports = async function main() {
 		premRow.push(combinedOpponentPoints);
 	});
 
-	console.log('premTable: ', premTable);
+	// console.log('premTable: ', premTable);
 
-	return premTable;
+	let csvStr = '';
+	premTable.forEach(row => {
+		csvStr += row.join(',');
+		csvStr += '\n';
+	});
+
+	return csvStr;
 };
 
 //we need link like this: https://www.espn.com/soccer/team/fixtures/_/id/364/liverpool
