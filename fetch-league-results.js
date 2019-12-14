@@ -35,6 +35,7 @@ module.exports = async function main() {
 
 	//add a "Remaining Difficulty" column and add all combined points into premTable
 	premTable[0].push('Remaining Difficulty');
+	premTable[0].push('Remaining Difficulty (As Array)');
 	premTable[0].push('Up Next');
 	results.forEach(function({ res, premRow }) {
 		const $ = cheerio.load(res.data);
@@ -58,12 +59,13 @@ module.exports = async function main() {
 		// 	}
 		// });
 
-		var combinedOpponentPoints = getRemainingDifficultyForTeam(
+		const remainingDifficulty = getRemainingDifficultyForTeam(
 			premRow[0],
 			scheduleTables,
 			premTable
 		);
-		premRow.push(combinedOpponentPoints);
+		premRow.push(_.sum(remainingDifficulty));
+		premRow.push(remainingDifficulty.join('|'));
 
 		//add a next up column
 		const nextOpponent = getNextOpponent(scheduleTables, premRow[0]);
@@ -142,12 +144,12 @@ function getRemainingDifficultyForTeam(team, scheduleTables, premTable) {
 	});
 
 	//now create a sum of points
-	var combinedPoints = 0;
-	opponentsLeftToPlay.forEach(function(opponent) {
-		combinedPoints += pointsByTeamName[opponent];
+	const remainingDifficulty = opponentsLeftToPlay.map(opponent => {
+		const opponentPoints = pointsByTeamName[opponent];
+		return opponentPoints;
 	});
 
-	return combinedPoints;
+	return remainingDifficulty;
 }
 
 function getTableAsObjects(tableAsArray) {
