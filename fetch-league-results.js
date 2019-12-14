@@ -194,6 +194,7 @@ function getCell(table, rowKeyOrIndex, columnKeyOrIndex) {
 function determineTeamsLeftToPlay(teamInQuestion, dataTables) {
 	var teamsLeftToPlay = [];
 	traverseTables(dataTables, {
+		includeHeader: true, //include header here because there is no header in schedule tables - i already filterd it out
 		forEachRow: function(row) {
 			const opponent = getOpponentFromSchedulePair(row, teamInQuestion);
 			teamsLeftToPlay.push(opponent);
