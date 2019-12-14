@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "zip": "zip aws.zip package.json fetch-league-results.js node_modules/* index.js package-lock.json"
   },
   "author": "",
   "license": "ISC",

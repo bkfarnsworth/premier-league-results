@@ -72,13 +72,14 @@ module.exports = async function main() {
 
 	// console.log('premTable: ', premTable);
 
-	let csvStr = '';
-	premTable.forEach(row => {
-		csvStr += row.join(',');
-		csvStr += '\n';
-	});
+	// let csvStr = '';
+	// premTable.forEach(row => {
+	// 	csvStr += row.join(',');
+	// 	csvStr += '\n';
+	// });
+	// return csvStr;
 
-	return csvStr;
+	return premTable;
 };
 
 function getNextOpponent(scheduleTables, teamInQuestion) {
