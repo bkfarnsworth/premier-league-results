@@ -35,11 +35,17 @@ module.exports = async function main() {
 
 	//add a "Remaining Difficulty" column and add all combined points into premTable
 	premTable[0].push('Remaining Difficulty');
+	premTable[0].push('Up Next');
 	results.forEach(function({ res, premRow }) {
 		const $ = cheerio.load(res.data);
 		var tables = $('table').toArray();
 		var scheduleTables = tables.map(function(t) {
 			return getCellsFromTable(t);
+		});
+
+		//filter table so it is only Premier League games
+		scheduleTables = scheduleTables.map(table => {
+			return table.filter(row => row.includes('English Premier League'));
 		});
 
 		//clean up all schedule tables to have the right bournemouth name
@@ -58,6 +64,10 @@ module.exports = async function main() {
 			premTable
 		);
 		premRow.push(combinedOpponentPoints);
+
+		//add a next up column
+		const nextOpponent = getNextOpponent(scheduleTables, premRow[0]);
+		premRow.push(nextOpponent);
 	});
 
 	// console.log('premTable: ', premTable);
@@ -70,6 +80,23 @@ module.exports = async function main() {
 
 	return csvStr;
 };
+
+function getNextOpponent(scheduleTables, teamInQuestion) {
+	const nextOpponentRow = scheduleTables[0][0];
+	const opponent = getOpponentFromSchedulePair(
+		nextOpponentRow,
+		teamInQuestion
+	);
+	return opponent;
+}
+
+function getOpponentFromSchedulePair(opponentRow, teamInQuestion) {
+	var team1 = opponentRow[1];
+	var team2 = opponentRow[3];
+	//find the opponent, not the current team
+	var opponent = team1 === teamInQuestion ? team2 : team1;
+	return opponent;
+}
 
 //we need link like this: https://www.espn.com/soccer/team/fixtures/_/id/364/liverpool
 //we get link like this: /soccer/team/_/id/364/liverpool
@@ -167,13 +194,8 @@ function determineTeamsLeftToPlay(teamInQuestion, dataTables) {
 	var teamsLeftToPlay = [];
 	traverseTables(dataTables, {
 		forEachRow: function(row) {
-			if (row.indexOf('English Premier League') !== -1) {
-				var team1 = row[1];
-				var team2 = row[3];
-				//find the opponent, not the current team
-				var opponent = team1 === teamInQuestion ? team2 : team1;
-				teamsLeftToPlay.push(opponent);
-			}
+			const opponent = getOpponentFromSchedulePair(row, teamInQuestion);
+			teamsLeftToPlay.push(opponent);
 		}
 	});
 
