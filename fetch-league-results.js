@@ -49,14 +49,14 @@ module.exports = async function main() {
 		});
 
 		//clean up all schedule tables to have the right bournemouth name
-		traverseTables(scheduleTables, {
-			forEachRow: function(row) {
-				var team1 = row[1];
-				var team2 = row[3];
-				row[1] = convertToValidName(team1);
-				row[3] = convertToValidName(team2);
-			}
-		});
+		// traverseTables(scheduleTables, {
+		// 	forEachRow: function(row) {
+		// 		var team1 = row[1];
+		// 		var team2 = row[3];
+		// 		row[1] = convertToValidName(team1);
+		// 		row[3] = convertToValidName(team2);
+		// 	}
+		// });
 
 		var combinedOpponentPoints = getRemainingDifficultyForTeam(
 			premRow[0],
@@ -319,7 +319,7 @@ function getValidTeamNames() {
 		'Arsenal',
 		'Manchester United',
 		'Tottenham Hotspur',
-		'Bournemouth',
+		'AFC Bournemouth',
 		'Brighton & Hove Albion',
 		'Crystal Palace',
 		'Newcastle United',
@@ -332,26 +332,31 @@ function getValidTeamNames() {
 	];
 }
 
-function convertToValidName(badName) {
-	//try swapping
-	var invalidNamePair = getInvalidNamePair(badName);
-	if (invalidNamePair) {
-		return invalidNamePair;
-	}
+//********************* THEY FIXED BOURNEMOUTH!
+// function convertToValidName(name) {
 
-	//for now if we got here, assume it was a good name
-	return badName;
-}
+// 	//try swapping
+// 	var invalidNamePair = getInvalidNamePair(badName);
+// 	if (invalidNamePair) {
+// 		return invalidNamePair;
+// 	}
 
-function getInvalidNamePair(str) {
-	return invalidNameMap()[str] || swap(invalidNameMap())[str];
-}
+// 	//for now if we got here, assume it was a good name
+// 	return badName;
+// }
 
-function invalidNameMap() {
-	return {
-		'AFC Bournemouth': 'Bournemouth'
-	};
-}
+// function getInvalidNamePair(str) {
+// 	return invalidNames()[str] || swap(invalidNames())[str];
+// }
+
+// function invalidNames() {
+// 	return [
+// 		{
+// 			validName: 'AFC Bournemouth',
+// 			invalidName: 'Bournemouth'
+// 		}
+// 	];
+// }
 
 function swap(json) {
 	var ret = {};
