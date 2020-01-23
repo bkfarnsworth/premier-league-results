@@ -68,8 +68,13 @@ module.exports = async function main() {
 		premRow.push(remainingDifficulty.join('|'));
 
 		//add a next up column
-		const nextOpponent = getNextOpponent(scheduleTables, premRow[0]);
-		premRow.push(nextOpponent);
+		//adding a try catch just because this was the first thing to break, I sould really do this for every column
+		try {
+			const nextOpponent = getNextOpponent(scheduleTables, premRow[0]);
+			premRow.push(nextOpponent);
+		} catch (e) {
+			premRow.push('ERROR');
+		}
 	});
 
 	// console.log('premTable: ', premTable);
